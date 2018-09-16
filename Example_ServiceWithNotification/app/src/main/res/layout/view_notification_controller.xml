@@ -19,56 +19,57 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
         android:contentDescription="@string/app_name"
         android:src="@mipmap/ic_launcher" />
 
     <TextView
         android:id="@+id/tv_name"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_alignBottom="@+id/iv_logo"
+        android:layout_height="20dp"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/iv_logo"
         android:layout_toStartOf="@+id/iv_close"
         android:ellipsize="marquee"
-        android:gravity="bottom|start"
-        android:maxLines="1"
+        android:textColor="@android:color/black"
+        android:singleLine="true"
         android:textSize="14sp" />
 
     <LinearLayout
         android:id="@+id/layout_controller"
         android:layout_width="match_parent"
-        android:gravity="center"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@+id/tv_name"
-        android:layout_marginTop="5dp"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginEnd="20dp"
             android:id="@+id/iv_previous"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="20dp"
             android:contentDescription="@string/app_name"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_previous" />
 
         <ImageView
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:id="@+id/iv_platy"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_marginEnd="20dp"
+            android:contentDescription="@string/app_name"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_pause" />
+
+        <ImageView
             android:id="@+id/iv_next"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:contentDescription="@string/app_name"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_next" />
 
-        <ImageView
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:id="@+id/iv_platy"
-            android:contentDescription="@string/app_name"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_pause" />
+
     </LinearLayout>
 </RelativeLayout>

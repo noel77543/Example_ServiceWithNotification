@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tw.noel.sung.com.example_servicewithnotification">
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -18,11 +19,11 @@
         </activity>
         <service
             android:name=".service.MyService"
-            android:enabled="true" >
-            <intent-filter android:priority="1000">
-                <action android:name="tw.noel.sung.com.example_servicewithnotification.service.MyService" />
-            </intent-filter>
-        </service>
+            android:exported="false" />
+        <receiver
+            android:name=".broadcast.MyBroadcast"
+            android:exported="false" />
+
 
     </application>
 

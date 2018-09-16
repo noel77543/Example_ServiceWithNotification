@@ -9,12 +9,11 @@ import android.widget.Button;
 
 import tw.noel.sung.com.example_servicewithnotification.broadcast.MyBroadcast;
 import tw.noel.sung.com.example_servicewithnotification.notification.CustomNotification;
+import tw.noel.sung.com.example_servicewithnotification.service.MyService;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MyBroadcast.OnActionCommandListener {
 
     private MyBroadcast broadcast;
-
-    private boolean isTest = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,23 +24,12 @@ public class MainActivity extends AppCompatActivity {
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startMusic();
+                Intent intent = new Intent(MainActivity.this, MyService.class);
+                intent.putExtra(MyBroadcast.BUNDLE_KEY,MyBroadcast.ACTION_SHOW);
+                startService(intent);
             }
         });
     }
-    //---------
-
-    /***
-     *  發送 notification 並且 告知service 撥放音樂
-     */
-    private void startMusic() {
-        Intent intent = new Intent(MyBroadcast.PLATFORM);
-        intent.putExtra(MyBroadcast.BUNDLE_KEY, isTest ? MyBroadcast.ACTION_SHOW : MyBroadcast.ACTION_CLOSE);
-        sendBroadcast(intent);
-
-        isTest = !isTest;
-    }
-
 
     //--------
 
@@ -66,8 +54,39 @@ public class MainActivity extends AppCompatActivity {
     private void registerBroadcastReceiver() {
         // 註冊接收器
         broadcast = new MyBroadcast();
+        broadcast.setOnActionCommandListener(this);
         IntentFilter filter = new IntentFilter();
         filter.addAction(MyBroadcast.PLATFORM);
         registerReceiver(broadcast, filter);
+    }
+
+    @Override
+    public void onActionShowed() {
+
+    }
+
+    @Override
+    public void onActionPlayed() {
+
+    }
+
+    @Override
+    public void onActionPaused() {
+
+    }
+
+    @Override
+    public void onActionNext() {
+
+    }
+
+    @Override
+    public void onActionPrevious() {
+
+    }
+
+    @Override
+    public void onActionClose() {
+
     }
 }
