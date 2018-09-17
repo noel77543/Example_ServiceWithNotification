@@ -49,8 +49,6 @@ public class MyService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.e("onCreate", "onCreate");
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             startForeground(NOTIFICATION_ID, getNotification());
@@ -92,39 +90,44 @@ public class MyService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e("onStartCommand", "onStartCommand");
-        if (intent != null) {
-            int action = intent.getIntExtra(MyBroadcast.BUNDLE_KEY, MyBroadcast.ERROR);
-            if (action != MyBroadcast.ERROR) {
-                switch (action) {
-                    case MyBroadcast.ACTION_SHOW:
-                        if (mediaPlayer == null) {
-                            openAssetMusics();
-                        }
-                        break;
-                    //繼續撥放音樂
-                    case MyBroadcast.ACTION_PLAY:
-                        break;
-                    //暫停
-                    case MyBroadcast.ACTION_PAUSE:
-                        break;
-                    //下一首
-                    case MyBroadcast.ACTION_NEXT:
-                        break;
-                    //前一首
-                    case MyBroadcast.ACTION_PREVIOUS:
-                        break;
-                    //結束
-                    case MyBroadcast.ACTION_CLOSE:
-                        stop();
-                        stopSelf();
-                        break;
-                }
-                Log.e("onStartCommand", "AAAAAAA");
-                Intent broadcastIntent = new Intent(MyBroadcast.PLATFORM);
-                broadcastIntent.putExtra(MyBroadcast.BUNDLE_KEY, action);
-                sendBroadcast(broadcastIntent);
+        int action = intent.getIntExtra(MyBroadcast.BUNDLE_KEY, MyBroadcast.ERROR);
+        if (action == MyBroadcast.ACTION_STATUS_CHANGE || action == MyBroadcast.ACTION_CLOSE) {
+            switch (action) {
+                //播放狀態改變
+                case MyBroadcast.ACTION_STATUS_CHANGE:
+                    if (mediaPlayer.isPlaying()) {
+                        pause();
+                    } else {
+                        play();
+                    }
+                    break;
+                //結束
+                case MyBroadcast.ACTION_CLOSE:
+                    Log.e("onStartCommand", "ACTION_CLOSE");
+
+                    stop();
+                    stopSelf();
+                    break;
             }
+
+        } else {
+            switch (action) {
+                case MyBroadcast.ACTION_SHOW:
+                    openAssetMusics();
+                    break;
+                //下一首
+                case MyBroadcast.ACTION_NEXT:
+                    break;
+                //前一首
+                case MyBroadcast.ACTION_PREVIOUS:
+                    break;
+
+            }
+            Intent broadcastIntent = new Intent(MyBroadcast.PLATFORM);
+            broadcastIntent.putExtra(MyBroadcast.BUNDLE_KEY_PLAYER_STATUS, mediaPlayer.isPlaying());
+            broadcastIntent.putExtra(MyBroadcast.BUNDLE_KEY, action);
+
+            sendBroadcast(broadcastIntent);
         }
 
         return START_STICKY;
@@ -137,19 +140,20 @@ public class MyService extends Service {
      * 打開assets的MP3
      */
     private void openAssetMusics() {
-        Log.e("openAssetMusics", "openAssetMusics");
-        mediaPlayer = new MediaPlayer();
-        try {
-            AssetFileDescriptor assetFileDescriptor = getAssets().openFd("something_like_this.mp3");
-            mediaPlayer.reset();
-            //設置媒體撥放器的數據資源
-            mediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor(), assetFileDescriptor.getStartOffset(), assetFileDescriptor.getLength());
-            mediaPlayer.prepare();
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
+            try {
+                AssetFileDescriptor assetFileDescriptor = getAssets().openFd("something_like_this.mp3");
+                mediaPlayer.reset();
+                //設置媒體撥放器的數據資源
+                mediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor(), assetFileDescriptor.getStartOffset(), assetFileDescriptor.getLength());
+                mediaPlayer.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (mediaPlayer != null) {
             mediaPlayer.start();
-        } catch (IOException e) {
-            Log.e("openAssetMusics", "IOException");
-
-            e.printStackTrace();
         }
     }
 
@@ -172,7 +176,7 @@ public class MyService extends Service {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             try {
-                mediaPlayer.prepare();  // 在调用stop后如果需要再次通过start进行播放,需要之前调用prepare函数
+                mediaPlayer.prepare();
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

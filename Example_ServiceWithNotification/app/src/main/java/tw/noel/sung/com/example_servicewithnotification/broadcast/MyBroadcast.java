@@ -9,6 +9,7 @@ import android.util.Log;
 import tw.noel.sung.com.example_servicewithnotification.MainActivity;
 import tw.noel.sung.com.example_servicewithnotification.R;
 import tw.noel.sung.com.example_servicewithnotification.notification.CustomNotification;
+import tw.noel.sung.com.example_servicewithnotification.service.MyService;
 
 /**
  * Created by noel on 2018/6/23.
@@ -16,8 +17,10 @@ import tw.noel.sung.com.example_servicewithnotification.notification.CustomNotif
 
 public class MyBroadcast extends BroadcastReceiver {
     public static final int ACTION_SHOW = 65;
-    public static final int ACTION_PLAY = 66;
-    public static final int ACTION_PAUSE = 67;
+//    public static final int ACTION_PLAY = 66;
+//////    public static final int ACTION_PAUSE = 67;
+
+    public static final int ACTION_STATUS_CHANGE = 66;
     public static final int ACTION_NEXT = 68;
     public static final int ACTION_PREVIOUS = 69;
     public static final int ACTION_CLOSE = 70;
@@ -25,6 +28,7 @@ public class MyBroadcast extends BroadcastReceiver {
     public static final int ERROR = -1;
 
     public static String BUNDLE_KEY = "BundleKey";
+    public static String BUNDLE_KEY_PLAYER_STATUS = "BundleKeyStatus";
     public static String PLATFORM = "TestPlatform";
 
     private CustomNotification customNotification;
@@ -32,27 +36,18 @@ public class MyBroadcast extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent != null) {
+
             //接收傳值
             int action = intent.getIntExtra(BUNDLE_KEY, ERROR);
-            if (action == ERROR) {
-                Log.e("ERROR", "ERROR");
-            } else {
-                Log.e("AAA", "AAA");
+            Log.e("action", "" + action);
+
+            if(action != ACTION_STATUS_CHANGE ){
                 switch (action) {
                     //發送notification 控制台 並且開始撥放音樂
                     case ACTION_SHOW:
                         customNotification = new CustomNotification(context, MainActivity.class, null);
                         customNotification.displayNotificationToLaunchActivity(R.mipmap.ic_launcher, R.mipmap.ic_launcher_round, "Something Just Like This.");
                         onActionCommandListener.onActionShowed();
-                        break;
-                    //繼續撥放音樂
-                    case ACTION_PLAY:
-                        onActionCommandListener.onActionPlayed();
-                        break;
-                    //暫停
-                    case ACTION_PAUSE:
-                        onActionCommandListener.onActionPaused();
                         break;
                     //下一首
                     case ACTION_NEXT:
@@ -64,26 +59,35 @@ public class MyBroadcast extends BroadcastReceiver {
                         break;
                     //結束
                     case ACTION_CLOSE:
-                        onActionCommandListener.onActionClose();
+                        Intent intentPlayerStatus = new Intent(context, MyService.class);
+                        intentPlayerStatus.putExtra(BUNDLE_KEY,ACTION_CLOSE);
+                        context.startService(intentPlayerStatus);
+
+                        onActionCommandListener.onActionClosed();
                         break;
                 }
+            }else {
+                Intent intentPlayerStatus = new Intent(context, MyService.class);
+                boolean isPlaying = intent.getBooleanExtra(BUNDLE_KEY_PLAYER_STATUS, false);
+                intentPlayerStatus.putExtra(BUNDLE_KEY,ACTION_STATUS_CHANGE);
+                context.startService(intentPlayerStatus);
+                onActionCommandListener.onPlayerStatusChanged(isPlaying);
             }
-        }
+
+
     }
     //----------
 
     public interface OnActionCommandListener {
         void onActionShowed();
 
-        void onActionPlayed();
-
-        void onActionPaused();
-
         void onActionNext();
 
         void onActionPrevious();
 
-        void onActionClose();
+        void onActionClosed();
+
+        void onPlayerStatusChanged(boolean isPlaying);
     }
 
     //-------

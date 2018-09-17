@@ -19,11 +19,13 @@ import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import tw.noel.sung.com.example_servicewithnotification.R;
+import tw.noel.sung.com.example_servicewithnotification.broadcast.MyBroadcast;
 import tw.noel.sung.com.example_servicewithnotification.service.MyService;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -35,14 +37,13 @@ import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class CustomNotification extends Notification {
 
-    public final static  int NOTIFICATION_ID = 9487;
+    public final static int NOTIFICATION_ID = 9487;
     //一般通知  單行字串 點選後開啟App 之 LaunchActivity
     public final static int NOTIFICATION_TYPE_NORMAL = 77;
     //大字串風格  點選後開啟App 之 LaunchActivity
     public final static int NOTIFICATION_TYPE_BIG_TEXT = 78;
     //客製化view  點選後開啟指定Activity
     public final static int NOTIFICATION_TYPE_CUSTOM = 79;
-
 
 
     @IntDef({NOTIFICATION_TYPE_NORMAL, NOTIFICATION_TYPE_BIG_TEXT, NOTIFICATION_TYPE_CUSTOM})
@@ -100,12 +101,7 @@ public class CustomNotification extends Notification {
      * 前往 主頁面
      */
     public void displayNotificationToLaunchActivity(int smallIconRes, int largeIconRes, String name) {
-        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.view_notification_controller);
-        remoteViews.setTextViewText(R.id.tv_name, name);
-        remoteViews.setImageViewResource(R.id.iv_close, R.drawable.ic_close);
-        remoteViews.setImageViewResource(R.id.iv_previous, R.drawable.ic_previous);
-        remoteViews.setImageViewResource(R.id.iv_next, R.drawable.ic_next);
-        remoteViews.setImageViewResource(R.id.iv_platy, R.drawable.ic_pause);
+        RemoteViews remoteViews = getRemoteViews(name);
 
         pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_ID, intentNotification, flags);
         defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -114,7 +110,7 @@ public class CustomNotification extends Notification {
         notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         //8.0 以上處理辦法
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel = new NotificationChannel(MyService.CHANNEL_ID, name,  NotificationManager.IMPORTANCE_HIGH);
+            notificationChannel = new NotificationChannel(MyService.CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
             notificationManager.createNotificationChannel(notificationChannel);
             // 建立通知
             notification = new Notification.Builder(context)
@@ -135,7 +131,8 @@ public class CustomNotification extends Notification {
                     //頻道ID
                     .setChannelId(MyService.CHANNEL_ID)
                     .build();
-        }else {
+
+        } else {
             // 建立通知
             notification = new NotificationCompat.Builder(context)
                     //狀態欄的icon
@@ -153,8 +150,8 @@ public class CustomNotification extends Notification {
                     //指定客製化view
                     .setCustomBigContentView(remoteViews)
                     .build();
-        }
 
+        }
 
 
         //使無法被滑除
@@ -164,4 +161,45 @@ public class CustomNotification extends Notification {
         notificationManager.notify(NOTIFICATION_ID, notification);
     }
 
+    //-------------
+
+    /***
+     *  定義通知中的按鈕行為
+     * @param name
+     * @return
+     */
+    private RemoteViews getRemoteViews(String name) {
+
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.view_notification_controller);
+        remoteViews.setTextViewText(R.id.tv_name, name);
+        remoteViews.setImageViewResource(R.id.iv_close, R.drawable.ic_close);
+        remoteViews.setImageViewResource(R.id.iv_previous, R.drawable.ic_previous);
+        remoteViews.setImageViewResource(R.id.iv_next, R.drawable.ic_next);
+        remoteViews.setImageViewResource(R.id.iv_play, R.drawable.ic_pause);
+
+        Intent intentClose = new Intent(MyBroadcast.PLATFORM);
+        intentClose.putExtra(MyBroadcast.BUNDLE_KEY, MyBroadcast.ACTION_CLOSE);
+        PendingIntent pendingIntentClose = PendingIntent.getBroadcast(context, 0, intentClose, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.iv_close, pendingIntentClose);
+
+
+        Intent intentPrevious = new Intent(MyBroadcast.PLATFORM);
+        intentPrevious.putExtra(MyBroadcast.BUNDLE_KEY, MyBroadcast.ACTION_PREVIOUS);
+        PendingIntent pendingIntentPrevious = PendingIntent.getBroadcast(context, 1, intentPrevious, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.iv_previous, pendingIntentPrevious);
+
+
+        Intent intentNext = new Intent(MyBroadcast.PLATFORM);
+        intentNext.putExtra(MyBroadcast.BUNDLE_KEY, MyBroadcast.ACTION_NEXT);
+        PendingIntent pendingIntentNext = PendingIntent.getBroadcast(context, 2, intentNext, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.iv_next, pendingIntentNext);
+
+
+        Intent intentPlay = new Intent(MyBroadcast.PLATFORM);
+        intentPlay.putExtra(MyBroadcast.BUNDLE_KEY, MyBroadcast.ACTION_STATUS_CHANGE);
+        PendingIntent pendingIntentPlay = PendingIntent.getBroadcast(context, 3, intentPlay, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.iv_play, pendingIntentPlay);
+
+        return remoteViews;
+    }
 }
