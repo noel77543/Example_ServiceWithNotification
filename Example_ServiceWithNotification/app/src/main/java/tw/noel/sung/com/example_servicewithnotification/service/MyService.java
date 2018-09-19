@@ -17,6 +17,7 @@ import android.util.Log;
 import java.io.IOException;
 
 import tw.noel.sung.com.example_servicewithnotification.MainActivity;
+import tw.noel.sung.com.example_servicewithnotification.R;
 import tw.noel.sung.com.example_servicewithnotification.broadcast.MyBroadcast;
 
 import static tw.noel.sung.com.example_servicewithnotification.notification.CustomNotification.NOTIFICATION_ID;
@@ -62,24 +63,11 @@ public class MyService extends Service {
      * @return
      */
     private Notification getNotification() {
-        Intent intentNotification = new Intent(getApplicationContext(), MainActivity.class);
-
-        intentNotification.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intentNotification.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, NOTIFICATION_ID, intentNotification, PendingIntent.FLAG_CANCEL_CURRENT);
-
-
-        Notification.Builder builder = new Notification.Builder(this)
-                //通知聲音
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                //設置的intent
-                .setContentIntent(pendingIntent)
-                //點了之後自動消失
-                .setAutoCancel(true)
-                .setChannelId(MyService.BACKGROUND_CHANNEL_ID);
-
-        return builder.getNotification();
+        return new Notification.Builder(this)
+                .setShowWhen(false)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setChannelId(MyService.BACKGROUND_CHANNEL_ID)
+                .build();
     }
 
 
