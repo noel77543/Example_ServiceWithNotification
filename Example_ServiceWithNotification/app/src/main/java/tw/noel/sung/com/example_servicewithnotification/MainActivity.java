@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.Button;
 
 import tw.noel.sung.com.example_servicewithnotification.broadcast.MyBroadcast;
-import tw.noel.sung.com.example_servicewithnotification.notification.CustomNotification;
 import tw.noel.sung.com.example_servicewithnotification.service.MyService;
 
 public class MainActivity extends AppCompatActivity implements MyBroadcast.OnActionCommandListener {
@@ -28,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements MyBroadcast.OnAct
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, MyService.class);
-                intent.putExtra(MyBroadcast.BUNDLE_KEY, isPlaying ? MyBroadcast.ACTION_CLOSE : MyBroadcast.ACTION_SHOW);
+                intent.putExtra(MyService.BUNDLE_KEY, isPlaying ? MyService.ACTION_CLOSE : MyService.ACTION_SHOW);
                 startService(intent);
             }
         });
@@ -39,29 +38,30 @@ public class MainActivity extends AppCompatActivity implements MyBroadcast.OnAct
     @Override
     protected void onResume() {
         super.onResume();
-        registerBroadcastReceiver();
+
+//        registerBroadcastReceiver();
     }
     //--------
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(broadcast);
+//        unregisterReceiver(broadcast);
     }
 
-    //--------
-
-    /***
-     *  動態註冊
-     */
-    private void registerBroadcastReceiver() {
-        // 註冊接收器
-        broadcast = new MyBroadcast();
-        broadcast.setOnActionCommandListener(this);
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(MyBroadcast.PLATFORM);
-        registerReceiver(broadcast, filter);
-    }
+//    //--------
+//
+//    /***
+//     *  動態註冊
+//     */
+//    private void registerBroadcastReceiver() {
+//        // 註冊接收器
+//        broadcast = new MyBroadcast();
+//        broadcast.setOnActionCommandListener(this);
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction(MyBroadcast.PLATFORM);
+//        registerReceiver(broadcast, filter);
+//    }
 
     @Override
     public void onActionShowed() {
