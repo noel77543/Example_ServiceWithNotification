@@ -73,6 +73,7 @@ public class CustomNotificationHelper extends Notification {
     private NotificationCompat.Builder notificationCompatBuilder;
     //8.0以上適用
     private Notification.Builder notificationBuilder;
+    private Notification notification;
 
 
     private NotificationManager notificationManager;
@@ -111,11 +112,7 @@ public class CustomNotificationHelper extends Notification {
         notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_ID, intentNotification, flags);
         defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            notificationChannel = new NotificationChannel(MyService.CHANNEL_ID, MyService.CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
-            notificationChannel.setDescription(MyService.CHANNEL_DESCRIPTION);
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
+
     }
 
 
@@ -124,71 +121,65 @@ public class CustomNotificationHelper extends Notification {
     /***
      * 建立8.0 以上推播
      */
-    public void displayNewNotification(int smallIconRes, String name) {
+    public void displayNotification(int smallIconRes, String name) {
         RemoteViews remoteViews = getRemoteViews(name);
-        notificationBuilder = new Notification.Builder(context, MyService.CHANNEL_ID)
-                //狀態欄的icon
-                .setSmallIcon(smallIconRes)
-                //使可以向下彈出
-                .setPriority(Notification.PRIORITY_HIGH)
-                //通知聲音
-                .setSound(defaultSoundUri)
-                //設置的intent
-                .setContentIntent(pendingIntent)
-                //點了之後自動消失
-                .setAutoCancel(true)
-                //指定客製化view
-                .setCustomContentView(remoteViews);
 
-        Notification notification = notificationBuilder.build();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationChannel = new NotificationChannel(MyService.CHANNEL_ID, MyService.CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
+            notificationChannel.setDescription(MyService.CHANNEL_DESCRIPTION);
+            notificationManager.createNotificationChannel(notificationChannel);
+
+            notificationBuilder = new Notification.Builder(context, MyService.CHANNEL_ID)
+                    //狀態欄的icon
+                    .setSmallIcon(smallIconRes)
+                    //使可以向下彈出
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    //通知聲音
+                    .setSound(defaultSoundUri)
+                    //設置的intent
+                    .setContentIntent(pendingIntent)
+                    //點了之後自動消失
+                    .setAutoCancel(true)
+                    //指定客製化view
+                    .setCustomContentView(remoteViews);
+
+            notification = notificationBuilder.build();
+        }
+        //建立8.0 以下推播
+        else {
+            notificationCompatBuilder = new NotificationCompat.Builder(context)
+                    //狀態欄的icon
+                    .setSmallIcon(smallIconRes)
+                    //使可以向下彈出
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    //通知聲音
+                    .setSound(defaultSoundUri)
+                    //設置的intent
+                    .setContentIntent(pendingIntent)
+                    //點了之後自動消失
+                    .setAutoCancel(true)
+                    //指定客製化view
+                    .setCustomContentView(remoteViews);
+
+            notification = notificationCompatBuilder.build();
+        }
+
         //使無法被滑除
         notification.flags = Notification.FLAG_ONGOING_EVENT;
-
         // 發送通知
         notificationManager.notify(NOTIFICATION_ID, notification);
     }
 
-
-    //---------------------------
-
-
-    /***
-     * 建立8.0 以下推播
-     */
-    public void displayOldNotification(int smallIconRes, String name) {
-
-        RemoteViews remoteViews = getRemoteViews(name);
-        notificationCompatBuilder = new NotificationCompat.Builder(context)
-                //狀態欄的icon
-                .setSmallIcon(smallIconRes)
-                //使可以向下彈出
-                .setPriority(Notification.PRIORITY_HIGH)
-                //通知聲音
-                .setSound(defaultSoundUri)
-                //設置的intent
-                .setContentIntent(pendingIntent)
-                //點了之後自動消失
-                .setAutoCancel(true)
-                //指定客製化view
-                .setCustomContentView(remoteViews);
-
-        Notification notification = notificationCompatBuilder.build();
-        //使無法被滑除
-        notification.flags = Notification.FLAG_ONGOING_EVENT;
-
-        // 發送通知
-        notificationManager.notify(NOTIFICATION_ID, notification);
-    }
 
     //-------------
 
     /***
      * 移除通知
      */
-    public void removeNotification(){
+    public void removeNotification() {
         notificationManager.cancel(NOTIFICATION_ID);
     }
-
 
 
     //-------------
@@ -208,22 +199,22 @@ public class CustomNotificationHelper extends Notification {
         remoteViews.setImageViewResource(R.id.iv_play, R.drawable.ic_pause);
 
 
-        Intent intentClose = new Intent(context,MyService.class);
+        Intent intentClose = new Intent(context, MyService.class);
         intentClose.putExtra(MyService.BUNDLE_KEY, MyService.ACTION_CLOSE);
         pendingIntentClose = PendingIntent.getService(context, 0, intentClose, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.iv_close, pendingIntentClose);
 
-        Intent intentPrevious = new Intent(context,MyService.class);
+        Intent intentPrevious = new Intent(context, MyService.class);
         intentPrevious.putExtra(MyService.BUNDLE_KEY, MyService.ACTION_PREVIOUS);
         pendingIntentPrevious = PendingIntent.getService(context, 1, intentPrevious, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.iv_previous, pendingIntentPrevious);
 
-        Intent intentNext = new Intent(context,MyService.class);
+        Intent intentNext = new Intent(context, MyService.class);
         intentNext.putExtra(MyService.BUNDLE_KEY, MyService.ACTION_NEXT);
         pendingIntentNext = PendingIntent.getService(context, 2, intentNext, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.iv_next, pendingIntentNext);
 
-        Intent intentPlay = new Intent(context,MyService.class);
+        Intent intentPlay = new Intent(context, MyService.class);
         intentPlay.putExtra(MyService.BUNDLE_KEY, MyService.ACTION_STATUS_CHANGE);
         pendingIntentPlay = PendingIntent.getService(context, 3, intentPlay, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.iv_play, pendingIntentPlay);

@@ -100,7 +100,6 @@ public class MyService extends Service {
                         break;
                     //結束
                     case ACTION_CLOSE:
-                        Log.e("onStartCommand", "ACTION_CLOSE");
                         customNotificationHelper.removeNotification();
                         stop();
                         stopSelf();
@@ -108,12 +107,10 @@ public class MyService extends Service {
                 }
 
             } else {
-                //8.0 以上版本
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     switch (action) {
                         case ACTION_SHOW:
                             customNotificationHelper = new CustomNotificationHelper(this, MainActivity.class, null);
-                            customNotificationHelper.displayNewNotification(R.mipmap.ic_launcher, "Something Just Like This.");
+                            customNotificationHelper.displayNotification(R.mipmap.ic_launcher, "Something Just Like This.");
                             openAssetMusics();
                             break;
                         //下一首
@@ -125,26 +122,6 @@ public class MyService extends Service {
                             Log.e("onStartCommand", "ACTION_PREVIOUS");
                             break;
                     }
-                }
-                //8.0 以下版本
-                else {
-                    switch (action) {
-                        //發送notification 控制台 並且開始撥放音樂
-                        case ACTION_SHOW:
-                            customNotificationHelper = new CustomNotificationHelper(this, MainActivity.class, null);
-                            customNotificationHelper.displayOldNotification(R.mipmap.ic_launcher, "Something Just Like This.");
-                            openAssetMusics();
-                            break;
-                        //下一首
-                        case ACTION_NEXT:
-                            Log.e("onStartCommand", "ACTION_NEXT");
-                            break;
-                        //前一首
-                        case ACTION_PREVIOUS:
-                            Log.e("onStartCommand", "ACTION_PREVIOUS");
-                            break;
-                    }
-                }
             }
         }
         else {
